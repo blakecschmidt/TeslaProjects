@@ -54,4 +54,5 @@ def oauth_token_request():
         json.dump(args, secrets_file, indent=2, default=str)
 
 
-oauth_token_request()
+if __name__ == "__main__":
+    oauth_token_request()

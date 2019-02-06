@@ -30,4 +30,5 @@ def refresh_oauth_token():
         json.dump(args, secrets_file, indent=2, default=str)
 
 
-refresh_oauth_token()
+if __name__ == "__main__":
+    refresh_oauth_token()
