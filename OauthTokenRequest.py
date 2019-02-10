@@ -4,27 +4,39 @@ import requests
 import json
 from datetime import datetime
 
-from Constants import base_uri
+from Constants import base_uri, client_id, client_secret
 
 
 def oauth_token_request():
 
-    with open("secrets.json") as secrets_file:
-        args = eval(secrets_file.read())
+    secrets = {
+        "email": input("Enter your Tesla account email address: "),
+        "password": input("Enter your Tesla account password: "),
+        "client_id": client_id,
+        "client_secret": client_secret,
+        "access_token": "",
+        "token_timestamp": "",
+        "refresh_token": "",
+        "id": ""
+    }
 
     oauth_token_request_data = {
       "grant_type": "password",
-      "client_id": args["client_id"],
-      "client_secret": args["client_secret"],
-      "email": args["email"],
-      "password": args["password"]
+      "client_id": secrets["client_id"],
+      "client_secret": secrets["client_secret"],
+      "email": secrets["email"],
+      "password": secrets["password"]
     }
 
     oauth_token = requests.post(base_uri + "oauth/token?grant_type=password",
                                 headers={"user-agent": "tesla_oauth_grant"}, data=oauth_token_request_data)
 
+    secrets["access_token"] = oauth_token.json()["access_token"]
+    secrets["token_timestamp"] = datetime.utcfromtimestamp(oauth_token.json()["created_at"])
+    secrets["refresh_token"] = oauth_token.json()["refresh_token"]
+
     header = {"user-agent": "vehicles-request",
-               "Authorization": f"Bearer {oauth_token.json()['access_token']}",
+               "Authorization": f"Bearer {secrets['access_token']}",
                "Content-Type": "application/json; charset=utf-8"}
 
     vehicles = requests.get("https://owner-api.teslamotors.com/api/1/vehicles", headers=header)
@@ -35,23 +47,17 @@ def oauth_token_request():
         for idx in range(0, vehicle_count):
             print(f"{idx + 1}. {vehicles.json()['response'][idx]['display_name']}")
         vehicle_idx = input("\nEnter the number of the vehicle you would like to use: ")
-        id = vehicles.json()["response"][vehicle_idx]["id"]
+        secrets["id"] = vehicles.json()["response"][vehicle_idx]["id"]
 
     elif vehicle_count < 1:
         print("No vehicles were found for this account.")
-        id = None
         exit()
 
     else:
-        id = vehicles.json()["response"][0]["id"]
+        secrets["id"] = vehicles.json()["response"][0]["id"]
 
-    args["access_token"] = oauth_token.json()["access_token"]
-    args["token_timestamp"] = datetime.utcfromtimestamp(oauth_token.json()["created_at"])
-    args["refresh_token"] = oauth_token.json()["refresh_token"]
-    args["id"] = str(id)
-
-    with open("secrets.json", "w") as secrets_file:
-        json.dump(args, secrets_file, indent=2, default=str)
+    with open("secrets.json", "w+") as secrets_file:
+        json.dump(secrets, secrets_file, indent=2, default=str)
 
 
 if __name__ == "__main__":
