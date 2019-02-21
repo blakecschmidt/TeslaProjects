@@ -9,7 +9,7 @@ from Constants import base_uri
 from OauthTokenRefresh import refresh_oauth_token
 
 
-def morning_weather_check():
+def climate_control():
 
     with open("secrets.json") as secrets_file:
         args = eval(secrets_file.read())
@@ -56,29 +56,34 @@ def morning_weather_check():
 
     if 50 <= inside_temp < 60:
         requests.post(f"{base_uri}/api/1/vehicles/{id}/command/auto_conditioning_start",
-                      header=header)
+                      headers=header)
         requests.post(f"{base_uri}/api/1/vehicles/{id}/command/remote_seat_heater_request", headers=header,
                       data=seat_heater_driver_medium)
         requests.post(f"{base_uri}/api/1/vehicles/{id}/command/set_temps", headers=header,
                       data=set_temps_72_f)
+        print(f"Inside temp was {inside_temp} F. Temperature set to 72 F and the driver's seat heater is set to medium.")
 
     elif 40 <= inside_temp < 50:
         requests.post(f"{base_uri}/api/1/vehicles/{id}/command/auto_conditioning_start",
-                      header=header)
+                      headers=header)
         requests.post(f"{base_uri}/api/1/vehicles/{id}/command/remote_seat_heater_request", headers=header,
                       data=seat_heater_driver_medium)
         requests.post(f"{base_uri}/api/1/vehicles/{id}/command/set_temps", headers=header,
                       data=set_temps_77_f)
+        print(f"Inside temp was {inside_temp} F. Temperature set to 77 F and the driver's seat heater is set to medium.")
 
     elif inside_temp < 40:
         requests.post(f"{base_uri}/api/1/vehicles/{id}/command/auto_conditioning_start",
-                      header=header)
+                      headers=header)
         requests.post(f"{base_uri}/api/1/vehicles/{id}/command/remote_seat_heater_request", headers=header,
                       data=seat_heater_driver_medium)
         requests.post(f"{base_uri}/api/1/vehicles/{id}/command/set_temps", headers=header,
                       data=set_temps_80_f)
+        print(f"Inside temp was {inside_temp} F. Temperature set to 80 F and the driver's seat heater is set to medium.")
+    else:
+        print("Climate controls were not activated.")
 
 
 if __name__ == "__main__":
-    morning_weather_check()
+    climate_control()
 

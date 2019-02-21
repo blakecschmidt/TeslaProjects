@@ -9,9 +9,12 @@ from Constants import base_uri, client_id, client_secret
 
 def oauth_token_request():
 
+    email = input("Enter your Tesla account email address: ")
+    password = input("Enter your Tesla account password: ")
+
     secrets = {
-        "email": input("Enter your Tesla account email address: "),
-        "password": input("Enter your Tesla account password: "),
+        "email": email,
+        "password": password,
         "client_id": client_id,
         "client_secret": client_secret,
         "access_token": "",
