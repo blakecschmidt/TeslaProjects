@@ -2,6 +2,7 @@
 
 import requests
 import time
+import json
 from datetime import datetime
 from datetime import timedelta
 import os
@@ -11,10 +12,26 @@ from OauthTokenRefresh import refresh_oauth_token
 from OauthTokenRequest import oauth_token_request
 
 
+def send_push(pushover_json, message):
+    pushover_json["message"] = message
+    requests.post("https://api.pushover.net/1/messages.json",
+                  headers={"user-agent": "pushover_request"}, data=pushover_json)
+
+
 def climate_control():
 
     file_path = os.path.dirname(__file__)
     secrets_path = os.path.join(file_path, "secrets.json")
+    pushover_path = os.path.join(file_path, "pushover.json")
+    pushover_json = {}
+
+    try:
+        with open(pushover_path) as pushover_file:
+            pushover_json = json.load(pushover_file)
+            has_pushover = True
+
+    except FileNotFoundError:
+        has_pushover = False
 
     try:
         with open(secrets_path) as secrets_file:
@@ -67,7 +84,6 @@ def climate_control():
 
     print(f"\n{climate_state.json()}\n")
     inside_temp = round(climate_state.json()["response"]["inside_temp"]*(9/5) + 32, 2)
-    print(f"Interior temperature is {inside_temp} F")
 
     seat_heater_driver_medium = {
                                  "heater": "0",
@@ -93,7 +109,12 @@ def climate_control():
                       data=seat_heater_driver_medium)
         requests.post(f"{base_uri}/api/1/vehicles/{user_id}/command/set_temps", headers=header,
                       data=set_temps_72_f)
-        print(f"Inside temp was {inside_temp} F. Temperature set to 72 F and the driver's seat heater is set to medium.")
+
+        message = f"Inside temp was {inside_temp} F. Temperature set to 72 F and the driver's seat heater is set to medium."
+        print(message)
+
+        if has_pushover:
+            send_push(pushover_json, message)
 
     elif 40 <= inside_temp < 50:
         requests.post(f"{base_uri}/api/1/vehicles/{user_id}/command/auto_conditioning_start",
@@ -102,7 +123,12 @@ def climate_control():
                       data=seat_heater_driver_medium)
         requests.post(f"{base_uri}/api/1/vehicles/{user_id}/command/set_temps", headers=header,
                       data=set_temps_77_f)
-        print(f"Inside temp was {inside_temp} F. Temperature set to 77 F and the driver's seat heater is set to medium.")
+
+        message = f"Inside temp was {inside_temp} F. Temperature set to 77 F and the driver's seat heater is set to medium."
+        print(message)
+
+        if has_pushover:
+            send_push(pushover_json, message)
 
     elif inside_temp < 40:
         requests.post(f"{base_uri}/api/1/vehicles/{user_id}/command/auto_conditioning_start",
@@ -111,9 +137,19 @@ def climate_control():
                       data=seat_heater_driver_medium)
         requests.post(f"{base_uri}/api/1/vehicles/{user_id}/command/set_temps", headers=header,
                       data=set_temps_80_f)
-        print(f"Inside temp was {inside_temp} F. Temperature set to 80 F and the driver's seat heater is set to medium.")
+
+        message = f"Inside temp was {inside_temp} F. Temperature set to 80 F and the driver's seat heater is set to medium."
+        print(message)
+
+        if has_pushover:
+            send_push(pushover_json, message)
+
     else:
-        print("Climate controls were not activated.")
+        message = f"Interior temperature is {inside_temp} F. Climate controls were not activated."
+        print(message)
+
+        if has_pushover:
+            send_push(pushover_json, message)
 
 
 if __name__ == "__main__":

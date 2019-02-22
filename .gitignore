@@ -1,4 +1,5 @@
 secrets.json
+pushover.json
 .idea
 venv
 __pycache__
