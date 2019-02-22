@@ -31,7 +31,7 @@ def oauth_token_request():
       "password": secrets["password"]
     }
 
-    oauth_token = requests.post(base_uri + "oauth/token?grant_type=password",
+    oauth_token = requests.post(f"{base_uri}/oauth/token?grant_type=password",
                                 headers={"user-agent": "tesla_oauth_grant"}, data=oauth_token_request_data)
 
     secrets["access_token"] = oauth_token.json()["access_token"]
