@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import sys
 from argparse import RawTextHelpFormatter
 from argparse import ArgumentParser
 from datetime import datetime
