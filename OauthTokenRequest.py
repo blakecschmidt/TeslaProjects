@@ -2,6 +2,7 @@
 
 import requests
 import json
+import os
 from datetime import datetime
 
 from Constants import base_uri, client_id, client_secret
@@ -59,7 +60,10 @@ def oauth_token_request():
     else:
         secrets["id"] = vehicles.json()["response"][0]["id"]
 
-    with open("secrets.json", "w+") as secrets_file:
+    file_path = os.path.dirname(__file__)
+    secrets_path = os.path.join(file_path, "secrets.json")
+
+    with open(secrets_path, "w+") as secrets_file:
         json.dump(secrets, secrets_file, indent=2, default=str)
 
 

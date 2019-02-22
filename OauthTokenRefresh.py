@@ -2,6 +2,7 @@
 
 import requests
 import json
+import os
 from datetime import datetime
 
 from Constants import base_uri
@@ -9,7 +10,10 @@ from Constants import base_uri
 
 def refresh_oauth_token():
 
-    with open("secrets.json") as secrets_file:
+    file_path = os.path.dirname(__file__)
+    secrets_path = os.path.join(file_path, "secrets.json")
+
+    with open(secrets_path) as secrets_file:
         args = eval(secrets_file.read())
 
     oauth_token_refresh_data = {
@@ -26,7 +30,7 @@ def refresh_oauth_token():
     args["token_timestamp"] = datetime.utcfromtimestamp(oauth_token.json()["created_at"])
     args["refresh_token"] = oauth_token.json()["refresh_token"]
 
-    with open("secrets.json", "w") as secrets_file:
+    with open(secrets_path, "w") as secrets_file:
         json.dump(args, secrets_file, indent=2, default=str)
 
 

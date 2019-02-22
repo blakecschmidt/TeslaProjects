@@ -4,6 +4,7 @@ import requests
 import time
 from datetime import datetime
 from datetime import timedelta
+import os
 
 from Constants import base_uri
 from OauthTokenRefresh import refresh_oauth_token
@@ -11,7 +12,10 @@ from OauthTokenRefresh import refresh_oauth_token
 
 def climate_control():
 
-    with open("secrets.json") as secrets_file:
+    file_path = os.path.dirname(__file__)
+    secrets_path = os.path.join(file_path, "secrets.json")
+
+    with open(secrets_path) as secrets_file:
         args = eval(secrets_file.read())
         access_token, token_timestamp, id = args["access_token"], args["token_timestamp"], args["id"]
 
@@ -20,7 +24,7 @@ def climate_control():
 
     if current_ts > token_expiration_ts:
         refresh_oauth_token()
-        with open("secrets.json") as secrets_file:
+        with open(secrets_path) as secrets_file:
             args = eval(secrets_file.read())
             access_token, id = args["access_token"], args["id"]
 
