@@ -3,6 +3,7 @@
 import requests
 import json
 import os
+import base64
 from datetime import datetime
 
 from Constants import base_uri, client_id, client_secret
@@ -15,7 +16,7 @@ def oauth_token_request():
 
     secrets = {
         "email": email,
-        "password": password,
+        "password": base64.b64encode(password.encode()).decode(),
         "client_id": client_id,
         "client_secret": client_secret,
         "access_token": "",
@@ -29,7 +30,7 @@ def oauth_token_request():
       "client_id": secrets["client_id"],
       "client_secret": secrets["client_secret"],
       "email": secrets["email"],
-      "password": secrets["password"]
+      "password": password
     }
 
     print("Requesting token...")
