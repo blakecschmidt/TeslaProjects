@@ -9,6 +9,8 @@ from ClimateControl import climate_control
 
 def main():
 
+    print(f"Launchpad executed at {datetime.now()}")
+
     parser = ArgumentParser(description="Tesla Launchpad", formatter_class=RawTextHelpFormatter)
 
     parser.add_argument("--execute", "-e", help="The program you want to execute.", required=True,
@@ -30,7 +32,7 @@ def main():
             kv = param.split("=")
             param_dict[kv[0]] = kv[1]
     except TypeError:
-        print("No parameters given.")
+        pass
 
     # Monday is 0 and Sunday is 6
     weekday = datetime.today().weekday()
@@ -44,8 +46,11 @@ def main():
             print("Not a weekend. Cancelling program...")
             return
 
-        print("Activating climate control...")
+        print("Activating climate control...\n")
         climate_control()
+
+    print("\nLaunchpad shutting down...")
+    print("\n\n\n")
 
 
 main()

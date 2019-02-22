@@ -21,7 +21,7 @@ def oauth_token_request():
         "access_token": "",
         "token_timestamp": "",
         "refresh_token": "",
-        "id": ""
+        "user_id": ""
     }
 
     oauth_token_request_data = {
@@ -32,11 +32,12 @@ def oauth_token_request():
       "password": secrets["password"]
     }
 
+    print("Requesting token...")
     oauth_token = requests.post(f"{base_uri}/oauth/token?grant_type=password",
                                 headers={"user-agent": "tesla_oauth_grant"}, data=oauth_token_request_data)
 
     secrets["access_token"] = oauth_token.json()["access_token"]
-    secrets["token_timestamp"] = datetime.utcfromtimestamp(oauth_token.json()["created_at"])
+    secrets["token_timestamp"] = datetime.fromtimestamp(oauth_token.json()["created_at"])
     secrets["refresh_token"] = oauth_token.json()["refresh_token"]
 
     header = {"user-agent": "vehicles-request",
@@ -58,13 +59,14 @@ def oauth_token_request():
         exit()
 
     else:
-        secrets["id"] = vehicles.json()["response"][0]["id"]
+        secrets["user_id"] = vehicles.json()["response"][0]["id"]
 
     file_path = os.path.dirname(__file__)
     secrets_path = os.path.join(file_path, "secrets.json")
 
     with open(secrets_path, "w+") as secrets_file:
         json.dump(secrets, secrets_file, indent=2, default=str)
+        print("Token has been created as secrets.json\n")
 
 
 if __name__ == "__main__":

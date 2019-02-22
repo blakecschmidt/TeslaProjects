@@ -6,15 +6,28 @@ import os
 from datetime import datetime
 
 from Constants import base_uri
+from OauthTokenRequest import oauth_token_request
 
 
 def refresh_oauth_token():
+    print("Refreshing token...")
 
     file_path = os.path.dirname(__file__)
     secrets_path = os.path.join(file_path, "secrets.json")
 
-    with open(secrets_path) as secrets_file:
-        args = eval(secrets_file.read())
+    try:
+        with open(secrets_path) as secrets_file:
+            args = eval(secrets_file.read())
+
+    except FileNotFoundError:
+        print("secrets.json file not found, requesting new token...")
+        oauth_token_request()
+        return
+
+    except SyntaxError:
+        print("secrets.json file corrupted, requesting new token...")
+        oauth_token_request()
+        return
 
     oauth_token_refresh_data = {
       "grant_type": "refresh_token",
@@ -23,7 +36,7 @@ def refresh_oauth_token():
       "refresh_token": args["refresh_token"]
     }
 
-    oauth_token = requests.post(base_uri + "oauth/token?grant_type=refresh_token",
+    oauth_token = requests.post(f"{base_uri}/oauth/token?grant_type=refresh_token",
                                 headers={"user-agent": "tesla_oauth_refresh"}, data=oauth_token_refresh_data)
 
     args["access_token"] = oauth_token.json()["access_token"]
@@ -32,6 +45,7 @@ def refresh_oauth_token():
 
     with open(secrets_path, "w") as secrets_file:
         json.dump(args, secrets_file, indent=2, default=str)
+        print("Token has been refreshed\n")
 
 
 if __name__ == "__main__":
