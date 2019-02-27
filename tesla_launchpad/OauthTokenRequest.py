@@ -6,7 +6,7 @@ import os
 import base64
 from datetime import datetime
 
-from Constants import base_uri, client_id, client_secret
+from tesla_launchpad.Constants import base_uri, client_id, client_secret
 
 
 def oauth_token_request():

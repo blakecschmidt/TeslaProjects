@@ -4,7 +4,7 @@ from argparse import RawTextHelpFormatter
 from argparse import ArgumentParser
 from datetime import datetime
 
-from ClimateControl import climate_control
+from tesla_launchpad.ClimateControl import climate_control
 
 
 def main():

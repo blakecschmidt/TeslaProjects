@@ -3,3 +3,4 @@ pushover.json
 .idea
 venv
 __pycache__
+test/

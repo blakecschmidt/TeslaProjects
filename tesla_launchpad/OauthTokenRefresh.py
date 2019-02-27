@@ -5,8 +5,8 @@ import json
 import os
 from datetime import datetime
 
-from Constants import base_uri
-from OauthTokenRequest import oauth_token_request
+from tesla_launchpad.Constants import base_uri
+from tesla_launchpad.OauthTokenRequest import oauth_token_request
 
 
 def refresh_oauth_token():
