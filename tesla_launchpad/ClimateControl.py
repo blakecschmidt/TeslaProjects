@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import requests
 import time
 import json
@@ -36,7 +34,7 @@ def climate_control():
     try:
         with open(secrets_path) as secrets_file:
             args = eval(secrets_file.read())
-            access_token, token_timestamp, user_id = args["access_token"], args["token_timestamp"], args["user_id"]
+            access_token, token_timestamp, id = args["access_token"], args["token_timestamp"], args["id"]
 
     except FileNotFoundError:
         print("secrets.json file not found, requesting new token...")
@@ -64,23 +62,23 @@ def climate_control():
         refresh_oauth_token()
         with open(secrets_path) as secrets_file:
             args = eval(secrets_file.read())
-            access_token, user_id = args["access_token"], args["id"]
+            access_token, id = args["access_token"], args["id"]
 
     header = {"user-agent": "morning-weather-check",
               "Authorization": f"Bearer {access_token}"
               }
 
     # Wake up vehicle and wait until its online
-    climate_state = requests.get(f"{base_uri}/api/1/vehicles/{user_id}/data_request/climate_state", headers=header)
+    climate_state = requests.get(f"{base_uri}/api/1/vehicles/{id}/data_request/climate_state", headers=header)
 
     while climate_state.status_code != 200:
         print("Waking up vehicle and waiting for 60 seconds...")
 
-        wake_up = requests.post(f"{base_uri}/api/1/vehicles/{user_id}/wake_up", headers=header)
+        wake_up = requests.post(f"{base_uri}/api/1/vehicles/{id}/wake_up", headers=header)
         print(f"\n{wake_up.json()}\n")
         time.sleep(60)
 
-        climate_state = requests.get(f"{base_uri}/api/1/vehicles/{user_id}/data_request/climate_state", headers=header)
+        climate_state = requests.get(f"{base_uri}/api/1/vehicles/{id}/data_request/climate_state", headers=header)
 
     print(f"\n{climate_state.json()}\n")
     inside_temp = round(climate_state.json()["response"]["inside_temp"]*(9/5) + 32, 2)
@@ -103,11 +101,11 @@ def climate_control():
                       }
 
     if 50 <= inside_temp < 60:
-        requests.post(f"{base_uri}/api/1/vehicles/{user_id}/command/auto_conditioning_start",
+        requests.post(f"{base_uri}/api/1/vehicles/{id}/command/auto_conditioning_start",
                       headers=header)
-        requests.post(f"{base_uri}/api/1/vehicles/{user_id}/command/remote_seat_heater_request", headers=header,
+        requests.post(f"{base_uri}/api/1/vehicles/{id}/command/remote_seat_heater_request", headers=header,
                       data=seat_heater_driver_medium)
-        requests.post(f"{base_uri}/api/1/vehicles/{user_id}/command/set_temps", headers=header,
+        requests.post(f"{base_uri}/api/1/vehicles/{id}/command/set_temps", headers=header,
                       data=set_temps_72_f)
 
         message = f"Inside temp was {inside_temp} F. Temperature set to 72 F and the driver's seat heater is set to medium."
@@ -117,11 +115,11 @@ def climate_control():
             send_push(pushover_json, message)
 
     elif 40 <= inside_temp < 50:
-        requests.post(f"{base_uri}/api/1/vehicles/{user_id}/command/auto_conditioning_start",
+        requests.post(f"{base_uri}/api/1/vehicles/{id}/command/auto_conditioning_start",
                       headers=header)
-        requests.post(f"{base_uri}/api/1/vehicles/{user_id}/command/remote_seat_heater_request", headers=header,
+        requests.post(f"{base_uri}/api/1/vehicles/{id}/command/remote_seat_heater_request", headers=header,
                       data=seat_heater_driver_medium)
-        requests.post(f"{base_uri}/api/1/vehicles/{user_id}/command/set_temps", headers=header,
+        requests.post(f"{base_uri}/api/1/vehicles/{id}/command/set_temps", headers=header,
                       data=set_temps_77_f)
 
         message = f"Inside temp was {inside_temp} F. Temperature set to 77 F and the driver's seat heater is set to medium."
@@ -131,11 +129,11 @@ def climate_control():
             send_push(pushover_json, message)
 
     elif inside_temp < 40:
-        requests.post(f"{base_uri}/api/1/vehicles/{user_id}/command/auto_conditioning_start",
+        requests.post(f"{base_uri}/api/1/vehicles/{id}/command/auto_conditioning_start",
                       headers=header)
-        requests.post(f"{base_uri}/api/1/vehicles/{user_id}/command/remote_seat_heater_request", headers=header,
+        requests.post(f"{base_uri}/api/1/vehicles/{id}/command/remote_seat_heater_request", headers=header,
                       data=seat_heater_driver_medium)
-        requests.post(f"{base_uri}/api/1/vehicles/{user_id}/command/set_temps", headers=header,
+        requests.post(f"{base_uri}/api/1/vehicles/{id}/command/set_temps", headers=header,
                       data=set_temps_80_f)
 
         message = f"Inside temp was {inside_temp} F. Temperature set to 80 F and the driver's seat heater is set to medium."
