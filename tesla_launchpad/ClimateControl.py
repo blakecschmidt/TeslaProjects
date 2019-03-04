@@ -76,12 +76,13 @@ def climate_control():
 
         wake_up = requests.post(f"{base_uri}/api/1/vehicles/{id}/wake_up", headers=header)
         print(f"\n{wake_up.json()}\n")
-        time.sleep(60)
 
         climate_state = requests.get(f"{base_uri}/api/1/vehicles/{id}/data_request/climate_state", headers=header)
+        print(f"Climate State status code: {climate_state.status_code}")
 
     print(f"\n{climate_state.json()}\n")
-    inside_temp = round(climate_state.json()["response"]["inside_temp"]*(9/5) + 32, 2)
+    outside_temp = round(climate_state.json()["response"]["outside_temp"]*(9/5) + 32, 2)
+    print(outside_temp)
 
     seat_heater_driver_medium = {
                                  "heater": "0",
@@ -100,7 +101,19 @@ def climate_control():
                       "passenger_temp": "26.6"
                       }
 
-    if 50 <= inside_temp < 60:
+    if 60 <= outside_temp < 70:
+        requests.post(f"{base_uri}/api/1/vehicles/{id}/command/auto_conditioning_start",
+                      headers=header)
+        requests.post(f"{base_uri}/api/1/vehicles/{id}/command/set_temps", headers=header,
+                      data=set_temps_72_f)
+
+        message = f"Outside temp was {outside_temp} F. Temperature set to 72 F."
+        print(message)
+
+        if has_pushover:
+            send_push(pushover_json, message)
+
+    elif 50 <= outside_temp < 60:
         requests.post(f"{base_uri}/api/1/vehicles/{id}/command/auto_conditioning_start",
                       headers=header)
         requests.post(f"{base_uri}/api/1/vehicles/{id}/command/remote_seat_heater_request", headers=header,
@@ -108,13 +121,13 @@ def climate_control():
         requests.post(f"{base_uri}/api/1/vehicles/{id}/command/set_temps", headers=header,
                       data=set_temps_72_f)
 
-        message = f"Inside temp was {inside_temp} F. Temperature set to 72 F and the driver's seat heater is set to medium."
+        message = f"Outside temp was {outside_temp} F. Temperature set to 72 F and the driver's seat heater is set to medium."
         print(message)
 
         if has_pushover:
             send_push(pushover_json, message)
 
-    elif 40 <= inside_temp < 50:
+    elif 40 <= outside_temp < 50:
         requests.post(f"{base_uri}/api/1/vehicles/{id}/command/auto_conditioning_start",
                       headers=header)
         requests.post(f"{base_uri}/api/1/vehicles/{id}/command/remote_seat_heater_request", headers=header,
@@ -122,13 +135,13 @@ def climate_control():
         requests.post(f"{base_uri}/api/1/vehicles/{id}/command/set_temps", headers=header,
                       data=set_temps_77_f)
 
-        message = f"Inside temp was {inside_temp} F. Temperature set to 77 F and the driver's seat heater is set to medium."
+        message = f"Outside temp was {outside_temp} F. Temperature set to 77 F and the driver's seat heater is set to medium."
         print(message)
 
         if has_pushover:
             send_push(pushover_json, message)
 
-    elif inside_temp < 40:
+    elif outside_temp < 40:
         requests.post(f"{base_uri}/api/1/vehicles/{id}/command/auto_conditioning_start",
                       headers=header)
         requests.post(f"{base_uri}/api/1/vehicles/{id}/command/remote_seat_heater_request", headers=header,
@@ -136,14 +149,14 @@ def climate_control():
         requests.post(f"{base_uri}/api/1/vehicles/{id}/command/set_temps", headers=header,
                       data=set_temps_80_f)
 
-        message = f"Inside temp was {inside_temp} F. Temperature set to 80 F and the driver's seat heater is set to medium."
+        message = f"Outside temp was {outside_temp} F. Temperature set to 80 F and the driver's seat heater is set to medium."
         print(message)
 
         if has_pushover:
             send_push(pushover_json, message)
 
     else:
-        message = f"Interior temperature is {inside_temp} F. Climate controls were not activated."
+        message = f"Outside temperature is {outside_temp} F. Climate controls were not activated."
         print(message)
 
         if has_pushover:
