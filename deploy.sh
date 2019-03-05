@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
-zip -r teslaLaunchpad.zip dependencies/
+cd package
+zip -r9 ../teslaLaunchpad.zip .
+cd ..
 zip -r teslaLaunchpad.zip tesla_launchpad/
 zip teslaLaunchpad.zip main.py
 

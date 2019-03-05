@@ -71,7 +71,7 @@ def climate_control():
     climate_state = requests.get(f"{base_uri}/api/1/vehicles/{id}/data_request/climate_state", headers=header)
 
     while climate_state.status_code != 200:
-        print("Waking up vehicle and waiting for 60 seconds...")
+        print("Waking up vehicle...")
 
         wake_up = requests.post(f"{base_uri}/api/1/vehicles/{id}/wake_up", headers=header)
         print(f"\n{wake_up.json()}\n")
