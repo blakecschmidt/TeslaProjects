@@ -1,21 +1,22 @@
 from datetime import datetime
+import json
 
 from tesla_launchpad.ClimateControl import climate_control
 
 
 def lambda_handler(event, context):
-    args = event["event"]["command"]
-    main(args)
-    return {
-        "status": 200,
-        "body": "Lambda executed successfully!"
-    }
+
+    args = {}
+    if event['httpMethod'] == 'POST':
+        args = json.loads(event['body'])
+
+    return main(args)
 
 
 def main(args):
     print(f"Launchpad executed at {datetime.now()}")
 
-    command = args
+    command = args["command"]
 
     if command == "ClimateControl":
 
