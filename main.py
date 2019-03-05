@@ -6,17 +6,23 @@ from tesla_launchpad.ClimateControl import climate_control
 
 def lambda_handler(event, context):
 
-    args = {}
-    if event['httpMethod'] == 'POST':
-        args = json.loads(event['body'])
+    command = None
+    try:
+        if event['httpMethod'] == 'POST':
+            args = json.loads(event['body'])
+            command = args["command"]
+    except KeyError:
+        command = event["command"]
 
-    return main(args)
+    return main(command)
 
 
-def main(args):
+def main(command):
     print(f"Launchpad executed at {datetime.now()}")
 
-    command = args["command"]
+    if command is None:
+        print("ERROR: No command given.")
+        return
 
     if command == "ClimateControl":
 
