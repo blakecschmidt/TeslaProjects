@@ -37,7 +37,6 @@ def climate_control():
 
     try:
         secrets_json = json.loads(s3.Object(bucket_name, secrets_file).get()["Body"].read())
-        print(secrets_json)
         access_token, token_timestamp, id = secrets_json["access_token"], secrets_json["token_timestamp"], secrets_json["id"]
     except:
         print("secrets.json does not exist or is corrupted, requesting new token...")
