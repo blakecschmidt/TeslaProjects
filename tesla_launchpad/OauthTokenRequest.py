@@ -1,7 +1,8 @@
 import requests
 import json
-import os
 import base64
+import boto3
+import os
 from datetime import datetime
 
 from tesla_launchpad.Constants import base_uri, client_id, client_secret
@@ -9,8 +10,8 @@ from tesla_launchpad.Constants import base_uri, client_id, client_secret
 
 def oauth_token_request():
 
-    email = input("Enter your Tesla account email address: ")
-    password = input("Enter your Tesla account password: ")
+    email = os.environ["EMAIL"]
+    password = os.environ["PASSWORD"]
 
     secrets = {
         "email": email,
@@ -20,7 +21,7 @@ def oauth_token_request():
         "access_token": "",
         "token_timestamp": "",
         "refresh_token": "",
-        "user_id": ""
+        "id": ""
     }
 
     oauth_token_request_data = {
@@ -58,14 +59,24 @@ def oauth_token_request():
         exit()
 
     else:
-        secrets["user_id"] = vehicles.json()["response"][0]["id"]
+        secrets["id"] = vehicles.json()["response"][0]["id"]
 
-    file_path = os.path.dirname(__file__)
-    secrets_path = os.path.join(file_path, "secrets.json")
+    print(secrets)
 
-    with open(secrets_path, "w+") as secrets_file:
-        json.dump(secrets, secrets_file, indent=2, default=str)
-        print("Token has been created as secrets.json\n")
+    bucket_name = "tesla-launchpad"
+    secrets_file = "secrets.json"
+    session = boto3.Session(
+        aws_access_key_id=os.environ["ACCESS_KEY"],
+        aws_secret_access_key=os.environ["SECRET_KEY"]
+    )
+    s3 = session.resource("s3")
+
+    try:
+        json_obj = s3.Object(bucket_name, secrets_file)
+        json_obj.put(Body=json.dumps(secrets, indent=2, default=str))
+        print("\nToken has been created as secrets.json\n")
+    except:
+        print("\nToken could not be written to storage.\n")
 
 
 if __name__ == "__main__":
