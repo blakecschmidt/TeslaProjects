@@ -68,6 +68,13 @@ def climate_control():
     # Wake up vehicle and wait until its online
     climate_state = requests.get(f"{base_uri}/api/1/vehicles/{id}/data_request/climate_state", headers=header)
 
+    if climate_state.json()["response"]["is_climate_on"]:
+        message = "Climate is already on, ClimateControl made no changes."
+        print(message)
+        if has_pushover:
+            send_push(pushover_json, message)
+        return
+
     while climate_state.status_code != 200:
         print("Waking up vehicle...")
 

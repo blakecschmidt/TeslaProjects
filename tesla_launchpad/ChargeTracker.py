@@ -92,7 +92,7 @@ def charge_tracker():
     print(f"latitude: {latitude}")
     print(f"longitude: {longitude}")
     print(f"battery_kwh: {battery_level_kwh}")
-
+    # charging_state: Charging/ Disconnected/
     fence = Fence(fence_points)
     if fence.check_point(current_location):
         isHome = True
