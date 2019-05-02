@@ -68,12 +68,15 @@ def climate_control():
     # Wake up vehicle and wait until its online
     climate_state = requests.get(f"{base_uri}/api/1/vehicles/{id}/data_request/climate_state", headers=header)
 
-    if climate_state.json()["response"]["is_climate_on"]:
-        message = "Climate is already on, ClimateControl made no changes."
-        print(message)
-        if has_pushover:
-            send_push(pushover_json, message)
-        return
+    try:
+        if climate_state.json()["response"]["is_climate_on"]:
+            message = "Climate is already on, ClimateControl made no changes."
+            print(message)
+            if has_pushover:
+                send_push(pushover_json, message)
+            return
+    except TypeError:
+        pass
 
     while climate_state.status_code != 200:
         print("Waking up vehicle...")
@@ -105,7 +108,7 @@ def climate_control():
                       "passenger_temp": "26.6"
                       }
 
-    if 60 <= outside_temp < 70:
+    if outside_temp >= 60:
         requests.post(f"{base_uri}/api/1/vehicles/{id}/command/auto_conditioning_start",
                       headers=header)
         requests.post(f"{base_uri}/api/1/vehicles/{id}/command/set_temps", headers=header,
